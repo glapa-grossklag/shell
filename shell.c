@@ -13,14 +13,14 @@
 #define eprintf(...) fprintf(stderr, __VA_ARGS__)
 #define strdup(s) (strcpy(malloc(strlen(s) + 1), s))
 
-static char **split(char *string, char *delimeter);
-static char *readline(FILE *file);
+static char **shell_split(char *string, char *delimeter);
+static char *shell_read_line(FILE *file);
 
 int main(void) {
     while (true) {
         printf("%s", PROMPT);
 
-		char *line = readline(stdin);
+		char *line = shell_read_line(stdin);
         if (line == NULL) {
             return EXIT_SUCCESS;
         }
@@ -31,7 +31,7 @@ int main(void) {
             eprintf("failed to fork\n");
             return EXIT_FAILURE;
         } else if (pid == 0) {
-			char **args = split(line, DELIMITER);
+			char **args = shell_split(line, DELIMITER);
             execvp(args[0], args);
 
 			// This will only be reached if EXECVP fails above.
@@ -44,7 +44,7 @@ int main(void) {
     return EXIT_SUCCESS;
 }
 
-static char **split(char *string, char *delimeter) {
+static char **shell_split(char *string, char *delimeter) {
 	// If a string literal is passed in, STRTOK would have a segmentation fault
 	// when it attempts to modify the string. For this reason we need a copy of
 	// the string.
@@ -78,7 +78,7 @@ static char **split(char *string, char *delimeter) {
 	return tokens;
 }
 
-static char *readline(FILE *file) {
+static char *shell_read_line(FILE *file) {
 	size_t size = 32;
 	char *line = malloc(size * sizeof(char));
 
