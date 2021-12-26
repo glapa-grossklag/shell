@@ -14,15 +14,14 @@
 #define strdup(s) (strcpy(malloc(strlen(s) + 1), s))
 
 static char **split(char *string, char *delimeter);
+static char *readline(FILE *file);
 
 int main(void) {
-    char line[BLOCK] = {0};
-
     while (true) {
         printf("%s", PROMPT);
 
-        // TODO: remove line length limit.
-        if (fgets(line, BLOCK, stdin) == NULL) {
+		char *line = readline(stdin);
+        if (line == NULL) {
             return EXIT_SUCCESS;
         }
 
@@ -54,25 +53,52 @@ static char **split(char *string, char *delimeter) {
 	// Allocate space for 32 strings to start of with, but change this size
 	// dynamically depending on what's needed.
 	size_t size = 32;
-	char **tokens = calloc(size, sizeof(char *));
+	char **tokens = malloc(size * sizeof(char *));
 
 	char *token = strtok(copy, delimeter);
 	tokens[0] = token;
 
-	for (size_t i = 1; ; i += 1) {
-		if (i > size) {
+	for (size_t position = 1; ; position += 1) {
+		if (position > size) {
 			if (realloc(tokens, size * 2 * sizeof(char)) == NULL) {
 				free(tokens);
 				return NULL;
 			}
+
+			size *= 2;
 		}
 
 		char *token = strtok(NULL, delimeter);
-		tokens[i] = token;
+		tokens[position] = token;
 		if (token == NULL) {
 			break;
 		}
 	}
 
 	return tokens;
+}
+
+static char *readline(FILE *file) {
+	size_t size = 32;
+	char *line = malloc(size * sizeof(char));
+
+	int current;
+	for (size_t position = 0; (current = fgetc(file)) != EOF; position += 1) {
+		if (position > size) {
+			if (realloc(line, size * 2 * sizeof(char)) == NULL) {
+				free(line);
+				return NULL;
+			}
+
+			size *= 2;
+		}
+
+		line[position] = (current == '\n' || current == EOF) ? '\0' : current;
+
+		if (current == '\n' || current == EOF) {
+			return line;
+		}
+	}
+
+	return line;
 }
