@@ -43,14 +43,22 @@ int main(void) {
     return EXIT_SUCCESS;
 }
 
+/**
+ * Split STRING on DELIMETER.
+ *
+ * For example:
+ *
+ *     >>> shell_split("Hello, world!", " ")
+ *     {"Hello,", "world!"}
+ */
 static char **shell_split(char *string, char *delimeter) {
     // If a string literal is passed in, STRTOK would have a segmentation fault
-    // when it attempts to modify the string. For this reason we need a copy of
-    // the string.
+    // when it attempts to modify the string -- therefore we need a copy of the
+    // string.
     char *copy = strdup(string);
 
-    // Allocate space for 32 strings to start of with, but change this size
-    // dynamically depending on what's needed.
+    // Allocate space for 32 strings to start of with, but we'll change this
+    // size dynamically depending on what's needed.
     size_t size = 32;
     char **tokens = malloc(size * sizeof(char *));
 
@@ -77,6 +85,10 @@ static char **shell_split(char *string, char *delimeter) {
     return tokens;
 }
 
+/**
+ * Read a single line from FILE, dynamically allocating the result to be as long
+ * as necessary.
+ */
 static char *shell_read_line(FILE *file) {
     size_t size = 32;
     char *line = malloc(size * sizeof(char));
